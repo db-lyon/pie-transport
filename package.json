@@ -1,0 +1,38 @@
+{
+  "name": "ue-mcp-replay",
+  "version": "0.0.1",
+  "description": "PIE record, replay, observe, and input injection for ue-mcp",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "ue",
+    "ue-mcp.plugin.yml",
+    "knowledge",
+    "README.md"
+  ],
+  "keywords": [
+    "ue-mcp-plugin",
+    "unreal-engine",
+    "replay",
+    "recording",
+    "pie"
+  ],
+  "peerDependencies": {
+    "@db-lyon/flowkit": ">=0.5.0"
+  },
+  "devDependencies": {
+    "@db-lyon/flowkit": "~0.5.2",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/db-lyon/ue-mcp-replay.git"
+  },
+  "license": "MIT",
+  "author": "db-lyon"
+}
