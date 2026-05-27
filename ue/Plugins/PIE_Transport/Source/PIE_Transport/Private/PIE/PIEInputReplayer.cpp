@@ -811,7 +811,12 @@ namespace UEMCPPIE
 
 			if (Frames.Num() > 0)
 			{
-				const FString GifPath = CaptureDir / TEXT("replay.gif");
+				const FString RecordingDir = FPaths::GetPath(CaptureDir);
+				const FString CapturesDir = RecordingDir / TEXT("captures");
+				IFileManager::Get().MakeDirectory(*CapturesDir, true);
+				const FString GifName = FString::Printf(TEXT("replay_%s.gif"),
+					*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S")));
+				const FString GifPath = CapturesDir / GifName;
 				FGifEncodeParams GP;
 				GP.DelayCs = 3;
 				GP.MaxWidth = 720;
@@ -822,6 +827,7 @@ namespace UEMCPPIE
 					{
 						IFileManager::Get().Delete(*F);
 					}
+					IFileManager::Get().DeleteDirectory(*CaptureDir, false, false);
 				}
 			}
 		}

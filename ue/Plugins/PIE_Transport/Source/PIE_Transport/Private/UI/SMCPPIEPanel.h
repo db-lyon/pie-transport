@@ -43,6 +43,7 @@ private:
 	// Recordings list
 	TSharedPtr<SVerticalBox> RecordingsListBox;
 	TArray<FString> CachedRecordingIds;
+	TSet<FString> ExpandedRecordingIds;
 	double LastRecordingsRefresh = 0.0;
 
 	// Profiles list

@@ -630,60 +630,137 @@ void SMCPPIEPanel::RefreshRecordings()
 	{
 		CachedRecordingIds.Add(D);
 		const FString Id = D;
+		const FString RecDir = Root / Id;
+
+		const FString CapturesDir = RecDir / TEXT("captures");
+		TArray<FString> Gifs;
+		IFileManager::Get().FindFiles(Gifs, *(CapturesDir / TEXT("*.gif")), true, false);
+		Gifs.Sort([](const FString& A, const FString& B) { return A > B; });
 
 		RecordingsListBox->AddSlot().AutoHeight().Padding(0, 2)
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()
 			[
-				SNew(STextBlock).Text(FText::FromString(Id))
-			]
-			+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
-			[
-				SNew(SButton)
-				.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
-				.ContentPadding(FMargin(2))
-				.ToolTipText(FText::FromString(TEXT("Replay")))
-				.OnClicked_Lambda([this, Id]()
-				{
-					UEMCPPIE::FReplayerArmConfig Cfg;
-					Cfg.SourceRecordingId = Id;
-					Cfg.CaptureFrameEvery = 2;
-					FString Err, Msg;
-					UEMCPPIE::FPIEInputReplayer::Get().Arm(Cfg, Err, Msg);
-					for (const FString& ProfilePath : ActiveProfilePaths)
-					{
-						UEMCPPIE::FObserverArmConfig OCfg;
-						OCfg.ProfilePath = ProfilePath;
-						FString OErr, OMsg;
-						UEMCPPIE::FPIEObserver::Get().Arm(OCfg, OErr, OMsg);
-					}
-					if (GEditor && !GEditor->PlayWorld)
-					{
-						FRequestPlaySessionParams P;
-						GEditor->RequestPlaySession(P);
-					}
-					return FReply::Handled();
-				})
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
 				[
-					SNew(SImage)
-					.Image(FSlateStyleRegistry::FindSlateStyle("PIETransportStyle")->GetBrush("PIETransport.Play"))
-					.DesiredSizeOverride(FVector2D(16.f))
+					SNew(STextBlock).Text(FText::FromString(Id))
+				]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
+				[
+					SNew(SButton)
+					.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
+					.ContentPadding(FMargin(2))
+					.ToolTipText(FText::FromString(TEXT("Replay + Capture")))
+					.OnClicked_Lambda([this, Id]()
+					{
+						UEMCPPIE::FReplayerArmConfig Cfg;
+						Cfg.SourceRecordingId = Id;
+						Cfg.CaptureFrameEvery = 2;
+						FString Err, Msg;
+						UEMCPPIE::FPIEInputReplayer::Get().Arm(Cfg, Err, Msg);
+						for (const FString& ProfilePath : ActiveProfilePaths)
+						{
+							UEMCPPIE::FObserverArmConfig OCfg;
+							OCfg.ProfilePath = ProfilePath;
+							FString OErr, OMsg;
+							UEMCPPIE::FPIEObserver::Get().Arm(OCfg, OErr, OMsg);
+						}
+						if (GEditor && !GEditor->PlayWorld)
+						{
+							FRequestPlaySessionParams P;
+							GEditor->RequestPlaySession(P);
+						}
+						return FReply::Handled();
+					})
+					[
+						SNew(SImage)
+						.Image(FSlateStyleRegistry::FindSlateStyle("PIETransportStyle")->GetBrush("PIETransport.Play"))
+						.DesiredSizeOverride(FVector2D(16.f))
+					]
+				]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(2, 0)
+				[
+					SNew(SButton)
+					.Text(FText::FromString(TEXT("Delete")))
+					.OnClicked_Lambda([this, Id]()
+					{
+						const FString RecPath = UEMCPPIE::DefaultRecordingsRoot() / Id;
+						IFileManager::Get().DeleteDirectory(*RecPath, false, true);
+						RefreshRecordings();
+						return FReply::Handled();
+					})
 				]
 			]
-			+ SHorizontalBox::Slot().AutoWidth().Padding(2, 0)
-			[
-				SNew(SButton)
-				.Text(FText::FromString(TEXT("Delete")))
-				.OnClicked_Lambda([this, Id]()
-				{
-					const FString RecPath = UEMCPPIE::DefaultRecordingsRoot() / Id;
-					IFileManager::Get().DeleteDirectory(*RecPath, false, true);
-					RefreshRecordings();
-					return FReply::Handled();
-				})
-			]
 		];
+
+		if (Gifs.Num() > 0)
+		{
+			TSharedRef<SVerticalBox> GifContent = SNew(SVerticalBox);
+			for (const FString& GifName : Gifs)
+			{
+				FString GifFullPath = FPaths::ConvertRelativePathToFull(CapturesDir / GifName);
+				FPaths::NormalizeFilename(GifFullPath);
+				GifFullPath.ReplaceInline(TEXT("/"), TEXT("\\"));
+
+				GifContent->AddSlot().AutoHeight().Padding(0, 1)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(GifName))
+						.ColorAndOpacity(FSlateColor(FLinearColor(0.7f, 0.7f, 0.7f)))
+					]
+					+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
+					[
+						SNew(SButton)
+						.Text(FText::FromString(TEXT("Open")))
+						.OnClicked_Lambda([GifFullPath]()
+						{
+							FPlatformProcess::LaunchFileInDefaultExternalApplication(*GifFullPath);
+							return FReply::Handled();
+						})
+					]
+					+ SHorizontalBox::Slot().AutoWidth().Padding(2, 0)
+					[
+						SNew(SButton)
+						.Text(FText::FromString(TEXT("Delete")))
+						.OnClicked_Lambda([this, GifFullPath]()
+						{
+							IFileManager::Get().Delete(*GifFullPath);
+							RefreshRecordings();
+							return FReply::Handled();
+						})
+					]
+				];
+			}
+
+			const bool bWasExpanded = ExpandedRecordingIds.Contains(Id);
+			RecordingsListBox->AddSlot().AutoHeight().Padding(16, 0, 0, 0)
+			[
+				SNew(SExpandableArea)
+				.InitiallyCollapsed(!bWasExpanded)
+				.OnAreaExpansionChanged_Lambda([this, Id](bool bExpanded)
+				{
+					if (bExpanded)
+						ExpandedRecordingIds.Add(Id);
+					else
+						ExpandedRecordingIds.Remove(Id);
+				})
+				.HeaderContent()
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString(FString::Printf(TEXT("%d replay GIFs"), Gifs.Num())))
+					.ColorAndOpacity(FSlateColor(FLinearColor::Gray))
+				]
+				.BodyContent()
+				[
+					GifContent
+				]
+			];
+		}
 	}
 
 	if (Dirs.Num() == 0)
