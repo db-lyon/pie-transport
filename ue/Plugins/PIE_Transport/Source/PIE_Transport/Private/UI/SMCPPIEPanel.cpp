@@ -297,18 +297,6 @@ void SMCPPIEPanel::Construct(const FArguments& InArgs)
 			[ SNew(SSeparator) ]
 
 			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 4)
-			[ BuildReplayerSection() ]
-
-			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4)
-			[ SNew(SSeparator) ]
-
-			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 4)
-			[ BuildObserverSection() ]
-
-			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4)
-			[ SNew(SSeparator) ]
-
-			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 4)
 			[ BuildTimeScaleSection() ]
 
 			+ SVerticalBox::Slot().AutoHeight().Padding(0, 4)
@@ -400,97 +388,6 @@ TSharedRef<SWidget> SMCPPIEPanel::BuildRecorderSection()
 		];
 }
 
-TSharedRef<SWidget> SMCPPIEPanel::BuildReplayerSection()
-{
-	return SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
-			[
-				SNew(STextBlock)
-				.Font(FAppStyle::GetFontStyle("BoldFont"))
-				.Text(FText::FromString(TEXT("Replayer")))
-			]
-			+ SHorizontalBox::Slot().FillWidth(1.f)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
-			[
-				SAssignNew(ReplayerStateText, STextBlock)
-				.Text(FText::FromString(TEXT("Idle")))
-			]
-		]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 4)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 4, 0)
-			[
-				SNew(SButton)
-				.Text(FText::FromString(TEXT("Disarm")))
-				.OnClicked_Lambda([]()
-				{
-					FString Err;
-					UEMCPPIE::FPIEInputReplayer::Get().Disarm(Err);
-					return FReply::Handled();
-				})
-			]
-			+ SHorizontalBox::Slot().AutoWidth()
-			[
-				SNew(SButton)
-				.Text(FText::FromString(TEXT("Stop")))
-				.OnClicked_Lambda([]()
-				{
-					UEMCPPIE::FPIEInputReplayer::Get().ForceStop();
-					return FReply::Handled();
-				})
-			]
-		];
-}
-
-TSharedRef<SWidget> SMCPPIEPanel::BuildObserverSection()
-{
-	return SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
-			[
-				SNew(STextBlock)
-				.Font(FAppStyle::GetFontStyle("BoldFont"))
-				.Text(FText::FromString(TEXT("Observer")))
-			]
-			+ SHorizontalBox::Slot().FillWidth(1.f)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
-			[
-				SAssignNew(ObserverStateText, STextBlock)
-				.Text(FText::FromString(TEXT("Idle")))
-			]
-		]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 4)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 4, 0)
-			[
-				SNew(SButton)
-				.Text(FText::FromString(TEXT("Disarm")))
-				.OnClicked_Lambda([]()
-				{
-					FString Err;
-					UEMCPPIE::FPIEObserver::Get().Disarm(Err);
-					return FReply::Handled();
-				})
-			]
-			+ SHorizontalBox::Slot().AutoWidth()
-			[
-				SNew(SButton)
-				.Text(FText::FromString(TEXT("Stop")))
-				.OnClicked_Lambda([]()
-				{
-					UEMCPPIE::FPIEObserver::Get().ForceStop();
-					return FReply::Handled();
-				})
-			]
-		];
-}
 
 void SMCPPIEPanel::ApplyTimeScale(float Scale)
 {
@@ -688,25 +585,6 @@ void SMCPPIEPanel::Tick(const FGeometry& AllottedGeometry, const double InCurren
 		const bool bRecActive = RS.State == UEMCPPIE::ERecorderState::Recording;
 		RecorderStateText->SetText(FText::FromString(RecText));
 		RecorderStateText->SetColorAndOpacity(StateColor(bRecActive));
-	}
-	{
-		const auto RS = UEMCPPIE::FPIEInputReplayer::Get().GetStatus();
-		const FString RepText = FString::Printf(TEXT("%s  %s  %d/%d  %.1fs"),
-			*ReplayerStateStr(RS.State), *RS.SourceRecordingId,
-			RS.CurrentStep, RS.TotalSteps, RS.ElapsedSeconds);
-		const bool bRepActive = RS.State == UEMCPPIE::EReplayerState::Replaying;
-		ReplayerStateText->SetText(FText::FromString(RepText));
-		ReplayerStateText->SetColorAndOpacity(StateColor(bRepActive));
-	}
-	{
-		const auto OS = UEMCPPIE::FPIEObserver::Get().GetStatus();
-		const FString ObsText = FString::Printf(TEXT("%s  %s  F:%d  %.1fs"),
-			*ObserverStateStr(OS.State),
-			*FPaths::GetBaseFilename(OS.ProfilePath),
-			OS.FramesSampled, OS.ElapsedSeconds);
-		const bool bObsActive = OS.State == UEMCPPIE::EObserverState::Observing;
-		ObserverStateText->SetText(FText::FromString(ObsText));
-		ObserverStateText->SetColorAndOpacity(StateColor(bObsActive));
 	}
 
 	// Re-apply time scale if PIE is running and dilation doesn't match

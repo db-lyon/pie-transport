@@ -29,8 +29,6 @@ private:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 	TSharedRef<SWidget> BuildRecorderSection();
-	TSharedRef<SWidget> BuildReplayerSection();
-	TSharedRef<SWidget> BuildObserverSection();
 	TSharedRef<SWidget> BuildTimeScaleSection();
 	TSharedRef<SWidget> BuildRecordingsSection();
 	TSharedRef<SWidget> BuildProfilesSection();
@@ -40,10 +38,7 @@ private:
 	void RefreshRecordings();
 	void RefreshProfiles();
 
-	// State text blocks updated per tick
 	TSharedPtr<STextBlock> RecorderStateText;
-	TSharedPtr<STextBlock> ReplayerStateText;
-	TSharedPtr<STextBlock> ObserverStateText;
 
 	// Recordings list
 	TSharedPtr<SVerticalBox> RecordingsListBox;
