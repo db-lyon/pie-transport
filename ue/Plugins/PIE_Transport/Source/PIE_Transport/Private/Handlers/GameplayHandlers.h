@@ -11,6 +11,7 @@ public:
 	static TSharedPtr<FJsonValue> GetPieAnimState(const TSharedPtr<FJsonObject>& Params);
 	static TSharedPtr<FJsonValue> GetPieAnimProperties(const TSharedPtr<FJsonObject>& Params);
 	static TSharedPtr<FJsonValue> GetPieSubsystemState(const TSharedPtr<FJsonObject>& Params);
+	static TSharedPtr<FJsonValue> ApplyDamageInPie(const TSharedPtr<FJsonObject>& Params);
 
 	// Input injection
 	static TSharedPtr<FJsonValue> InjectInput(const TSharedPtr<FJsonObject>& Params);

@@ -39,6 +39,7 @@ nativeModule:
     anim_state: { description: "Get PIE anim instance state" }
     anim_properties: { description: "Read UPROPERTY values on a PIE actor's AnimInstance" }
     subsystem_state: { description: "Read UPROPERTY values on a running subsystem in PIE" }
+    apply_damage: { description: "Apply damage to a PIE actor via UGameplayStatics" }
 
 inject: {}
 tasks: {}

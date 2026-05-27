@@ -18,6 +18,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonWriter.h"
 #include "Serialization/JsonSerializer.h"
+#include "JsonSerializer.h"
 
 namespace
 {

@@ -78,6 +78,7 @@ void FPIE_TransportModule::StartupModule()
 	UEMCP::RegisterExternalHandler(TEXT("anim_state"), &FGameplayHandlers::GetPieAnimState);
 	UEMCP::RegisterExternalHandler(TEXT("anim_properties"), &FGameplayHandlers::GetPieAnimProperties);
 	UEMCP::RegisterExternalHandler(TEXT("subsystem_state"), &FGameplayHandlers::GetPieSubsystemState);
+	UEMCP::RegisterExternalHandler(TEXT("apply_damage"), &FGameplayHandlers::ApplyDamageInPie);
 
 	// CPU throttle suppression while recording/replaying/observing
 	FTSTicker::GetCoreTicker().AddTicker(
@@ -145,6 +146,7 @@ void FPIE_TransportModule::ShutdownModule()
 	UEMCP::UnregisterExternalHandler(TEXT("anim_state"));
 	UEMCP::UnregisterExternalHandler(TEXT("anim_properties"));
 	UEMCP::UnregisterExternalHandler(TEXT("subsystem_state"));
+	UEMCP::UnregisterExternalHandler(TEXT("apply_damage"));
 
 	UEMCPPIE::FPIEObserver::Get().Shutdown();
 	UEMCPPIE::FPIEInputReplayer::Get().Shutdown();
