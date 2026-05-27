@@ -25,6 +25,7 @@ public class UE_MCP_Replay : ModuleRules
 				"EnhancedInput",
 				"InputCore",
 				"Kismet",
+				"LevelEditor",
 				"RenderCore",
 				"RHI",
 				"Slate",

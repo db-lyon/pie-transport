@@ -4,6 +4,8 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 
+class FExtender;
+
 class SMCPPIEPanel : public SCompoundWidget
 {
 public:
@@ -19,6 +21,9 @@ public:
 	static void UnregisterToolbarButton();
 
 	static const FName TabId;
+
+private:
+	static TSharedPtr<FExtender> ToolbarExtender;
 
 private:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;

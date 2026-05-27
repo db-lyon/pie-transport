@@ -16,6 +16,7 @@
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
 #include "Styling/AppStyle.h"
+#include "LevelEditor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
 #include "Kismet/GameplayStatics.h"
@@ -98,78 +99,90 @@ void SMCPPIEPanel::OpenTab()
 	FGlobalTabmanager::Get()->TryInvokeTab(TabId);
 }
 
+TSharedPtr<FExtender> SMCPPIEPanel::ToolbarExtender;
+
 void SMCPPIEPanel::RegisterToolbarButton()
 {
-	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateLambda([]()
-	{
-		UToolMenus* TM = UToolMenus::Get();
-		if (!TM) return;
+	ToolbarExtender = MakeShareable(new FExtender);
+	ToolbarExtender->AddToolBarExtension(
+		"Play",
+		EExtensionHook::After,
+		nullptr,
+		FToolBarExtensionDelegate::CreateLambda([](FToolBarBuilder& Builder)
+		{
+			Builder.AddSeparator();
 
-		UToolMenu* PlayMenu = TM->ExtendMenu("LevelEditor.LevelEditorToolBar.PlayToolBar");
-		if (!PlayMenu) return;
-
-		FToolMenuSection& Section = PlayMenu->FindOrAddSection("MCPPIEButtons");
-
-		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-			"MCPRecordAndPlay",
-			FUIAction(FExecuteAction::CreateLambda([]()
-			{
-				UEMCPPIE::FRecorderArmConfig Cfg;
-				FString Err, Msg;
-				UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
-				if (GEditor && !GEditor->PlayWorld)
+			Builder.AddToolBarButton(
+				FUIAction(FExecuteAction::CreateLambda([]()
 				{
-					FRequestPlaySessionParams P; GEditor->RequestPlaySession(P);
-				}
-			})),
-			FText::FromString(TEXT("Rec+Play")),
-			FText::FromString(TEXT("Arm MCP recorder and start PIE")),
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Recording")
-		));
+					UEMCPPIE::FRecorderArmConfig Cfg;
+					FString Err, Msg;
+					UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+					if (GEditor && !GEditor->PlayWorld)
+					{
+						FRequestPlaySessionParams P;
+						GEditor->RequestPlaySession(P);
+					}
+				})),
+				NAME_None,
+				FText::FromString(TEXT("Rec+Play")),
+				FText::FromString(TEXT("Arm MCP recorder and start PIE")),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Recording")
+			);
 
-		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-			"MCPArm",
-			FUIAction(FExecuteAction::CreateLambda([]()
-			{
-				UEMCPPIE::FRecorderArmConfig Cfg;
-				FString Err, Msg;
-				UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
-			})),
-			FText::FromString(TEXT("Arm")),
-			FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
-			FSlateIcon()
-		));
+			Builder.AddToolBarButton(
+				FUIAction(FExecuteAction::CreateLambda([]()
+				{
+					UEMCPPIE::FRecorderArmConfig Cfg;
+					FString Err, Msg;
+					UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+				})),
+				NAME_None,
+				FText::FromString(TEXT("Arm")),
+				FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Check")
+			);
 
-		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-			"MCPDisarm",
-			FUIAction(FExecuteAction::CreateLambda([]()
-			{
-				FString Err;
-				UEMCPPIE::FPIEInputRecorder::Get().Disarm(Err);
-			})),
-			FText::FromString(TEXT("Disarm")),
-			FText::FromString(TEXT("Disarm MCP recorder")),
-			FSlateIcon()
-		));
+			Builder.AddToolBarButton(
+				FUIAction(FExecuteAction::CreateLambda([]()
+				{
+					FString Err;
+					UEMCPPIE::FPIEInputRecorder::Get().Disarm(Err);
+				})),
+				NAME_None,
+				FText::FromString(TEXT("Disarm")),
+				FText::FromString(TEXT("Disarm MCP recorder")),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.X")
+			);
 
-		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-			"MCPStop",
-			FUIAction(FExecuteAction::CreateLambda([]()
-			{
-				UEMCPPIE::FPIEInputRecorder::Get().ForceStop();
-			})),
-			FText::FromString(TEXT("Stop")),
-			FText::FromString(TEXT("Force stop MCP recording")),
-			FSlateIcon()
-		));
-	}));
+			Builder.AddToolBarButton(
+				FUIAction(FExecuteAction::CreateLambda([]()
+				{
+					UEMCPPIE::FPIEInputRecorder::Get().ForceStop();
+				})),
+				NAME_None,
+				FText::FromString(TEXT("Stop")),
+				FText::FromString(TEXT("Force stop MCP recording")),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Delete")
+			);
+		})
+	);
+
+	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 }
 
 void SMCPPIEPanel::UnregisterToolbarButton()
 {
-	UToolMenus* TM = UToolMenus::Get();
-	if (!TM) return;
-	TM->RemoveSection("LevelEditor.LevelEditorToolBar.PlayToolBar", "MCPPIEButtons");
+	if (ToolbarExtender.IsValid())
+	{
+		FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>("LevelEditor");
+		if (LevelEditorModule)
+		{
+			LevelEditorModule->GetToolBarExtensibilityManager()->RemoveExtender(ToolbarExtender);
+		}
+		ToolbarExtender.Reset();
+	}
 }
 
 void SMCPPIEPanel::Construct(const FArguments& InArgs)
