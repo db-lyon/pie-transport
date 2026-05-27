@@ -9,13 +9,17 @@
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SComboButton.h"
 #include "Widgets/Input/SSlider.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Framework/Docking/TabManager.h"
 #include "ToolMenus.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
 #include "Styling/AppStyle.h"
+#include "Styling/SlateStyleRegistry.h"
+#include "Misc/Paths.h"
 #include "LevelEditor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
@@ -25,6 +29,35 @@
 #include "Misc/Paths.h"
 
 const FName SMCPPIEPanel::TabId(TEXT("MCPPIEPanel"));
+
+#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(PIETransportStyleSet->RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+
+static TSharedPtr<FSlateStyleSet> PIETransportStyleSet;
+
+static void RegisterPIETransportStyle()
+{
+	if (PIETransportStyleSet.IsValid()) return;
+
+	FString ResourcesDir = FPaths::Combine(
+		FPaths::ProjectPluginsDir(), TEXT("PIE_Transport"), TEXT("Resources"));
+
+	PIETransportStyleSet = MakeShareable(new FSlateStyleSet("PIETransportStyle"));
+	PIETransportStyleSet->SetContentRoot(ResourcesDir);
+	PIETransportStyleSet->Set("PIETransport.Record", new IMAGE_BRUSH("Record_Icon40x", CoreStyleConstants::Icon16x16));
+	PIETransportStyleSet->Set("PIETransport.RecordPlay", new IMAGE_BRUSH("RecordPlay_Icon40x", CoreStyleConstants::Icon16x16));
+	FSlateStyleRegistry::RegisterSlateStyle(*PIETransportStyleSet);
+}
+
+static void UnregisterPIETransportStyle()
+{
+	if (PIETransportStyleSet.IsValid())
+	{
+		FSlateStyleRegistry::UnRegisterSlateStyle(*PIETransportStyleSet);
+		PIETransportStyleSet.Reset();
+	}
+}
+
+#undef IMAGE_BRUSH
 
 namespace
 {
@@ -103,86 +136,136 @@ TSharedPtr<FExtender> SMCPPIEPanel::ToolbarExtender;
 
 void SMCPPIEPanel::RegisterToolbarButton()
 {
-	ToolbarExtender = MakeShareable(new FExtender);
-	ToolbarExtender->AddToolBarExtension(
-		"Play",
-		EExtensionHook::After,
-		nullptr,
-		FToolBarExtensionDelegate::CreateLambda([](FToolBarBuilder& Builder)
+	RegisterPIETransportStyle();
+
+	UToolMenu* ToolBar = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.PlayToolBar");
+	FToolMenuSection& Section = ToolBar->FindOrAddSection("PIETransport");
+
+	Section.AddDynamicEntry("PIETransportActions", FNewToolMenuSectionDelegate::CreateLambda([](FToolMenuSection& InSection)
+	{
 		{
-			Builder.AddSeparator();
-
-			Builder.AddToolBarButton(
-				FUIAction(FExecuteAction::CreateLambda([]()
-				{
-					UEMCPPIE::FRecorderArmConfig Cfg;
-					FString Err, Msg;
-					UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
-					if (GEditor && !GEditor->PlayWorld)
+			FToolMenuEntry Entry =
+				FToolMenuEntry::InitToolBarButton(
+					"Record",
+					FExecuteAction::CreateLambda([]()
 					{
-						FRequestPlaySessionParams P;
-						GEditor->RequestPlaySession(P);
-					}
-				})),
-				NAME_None,
-				FText::FromString(TEXT("Rec+Play")),
-				FText::FromString(TEXT("Arm MCP recorder and start PIE")),
-				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Recording")
-			);
+						UEMCPPIE::FRecorderArmConfig Cfg;
+						FString Err, Msg;
+						UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+					}),
+					FText::GetEmpty(),
+					FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
+					FSlateIcon("PIETransportStyle", "PIETransport.Record"));
+			Entry.StyleNameOverride = FName("Toolbar.BackplateLeft");
+			InSection.AddEntry(Entry);
+		}
 
-			Builder.AddToolBarButton(
-				FUIAction(FExecuteAction::CreateLambda([]()
-				{
-					UEMCPPIE::FRecorderArmConfig Cfg;
-					FString Err, Msg;
-					UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
-				})),
-				NAME_None,
-				FText::FromString(TEXT("Arm")),
-				FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
-				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Check")
-			);
+		{
+			FToolMenuEntry Entry =
+				FToolMenuEntry::InitToolBarButton(
+					"RecordPlay",
+					FExecuteAction::CreateLambda([]()
+					{
+						UEMCPPIE::FRecorderArmConfig Cfg;
+						FString Err, Msg;
+						UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+						if (GEditor && !GEditor->PlayWorld)
+						{
+							FRequestPlaySessionParams P;
+							GEditor->RequestPlaySession(P);
+						}
+					}),
+					FText::GetEmpty(),
+					FText::FromString(TEXT("Arm MCP recorder and start PIE")),
+					FSlateIcon("PIETransportStyle", "PIETransport.RecordPlay"));
+			Entry.StyleNameOverride = FName("Toolbar.BackplateCenter");
+			InSection.AddEntry(Entry);
+		}
 
-			Builder.AddToolBarButton(
-				FUIAction(FExecuteAction::CreateLambda([]()
-				{
-					FString Err;
-					UEMCPPIE::FPIEInputRecorder::Get().Disarm(Err);
-				})),
-				NAME_None,
-				FText::FromString(TEXT("Disarm")),
-				FText::FromString(TEXT("Disarm MCP recorder")),
-				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.X")
-			);
+		{
+			FToolMenuEntry ComboEntry =
+				FToolMenuEntry::InitComboButton(
+					"PIETransportMenu",
+					FUIAction(),
+					FNewMenuDelegate::CreateLambda([](FMenuBuilder& Menu)
+					{
+						Menu.BeginSection("Recording", FText::FromString(TEXT("Recording")));
 
-			Builder.AddToolBarButton(
-				FUIAction(FExecuteAction::CreateLambda([]()
-				{
-					UEMCPPIE::FPIEInputRecorder::Get().ForceStop();
-				})),
-				NAME_None,
-				FText::FromString(TEXT("Stop")),
-				FText::FromString(TEXT("Force stop MCP recording")),
-				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Delete")
-			);
-		})
-	);
+						Menu.AddMenuEntry(
+							FText::FromString(TEXT("Record + Play")),
+							FText::FromString(TEXT("Arm MCP recorder and start PIE")),
+							FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Recording"),
+							FUIAction(FExecuteAction::CreateLambda([]()
+							{
+								UEMCPPIE::FRecorderArmConfig Cfg;
+								FString Err, Msg;
+								UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+								if (GEditor && !GEditor->PlayWorld)
+								{
+									FRequestPlaySessionParams P;
+									GEditor->RequestPlaySession(P);
+								}
+							}))
+						);
 
-	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+						Menu.AddMenuEntry(
+							FText::FromString(TEXT("Arm Recorder")),
+							FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
+							FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Recording"),
+							FUIAction(FExecuteAction::CreateLambda([]()
+							{
+								UEMCPPIE::FRecorderArmConfig Cfg;
+								FString Err, Msg;
+								UEMCPPIE::FPIEInputRecorder::Get().Arm(Cfg, Err, Msg);
+							}))
+						);
+
+						Menu.AddMenuEntry(
+							FText::FromString(TEXT("Disarm Recorder")),
+							FText::FromString(TEXT("Disarm MCP recorder")),
+							FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.X"),
+							FUIAction(FExecuteAction::CreateLambda([]()
+							{
+								FString Err;
+								UEMCPPIE::FPIEInputRecorder::Get().Disarm(Err);
+							}))
+						);
+
+						Menu.AddMenuEntry(
+							FText::FromString(TEXT("Stop Recording")),
+							FText::FromString(TEXT("Force stop MCP recording")),
+							FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Delete"),
+							FUIAction(FExecuteAction::CreateLambda([]()
+							{
+								UEMCPPIE::FPIEInputRecorder::Get().ForceStop();
+							}))
+						);
+
+						Menu.EndSection();
+
+						Menu.BeginSection("Panel", FText::FromString(TEXT("Panel")));
+						Menu.AddMenuEntry(
+							FText::FromString(TEXT("Open PIE Transport Panel")),
+							FText::FromString(TEXT("Open the full PIE Transport control panel")),
+							FSlateIcon(),
+							FUIAction(FExecuteAction::CreateLambda([]()
+							{
+								SMCPPIEPanel::OpenTab();
+							}))
+						);
+						Menu.EndSection();
+					}),
+					FText::GetEmpty(),
+					FText::FromString(TEXT("PIE Transport Options")));
+			ComboEntry.StyleNameOverride = FName("Toolbar.BackplateRightCombo");
+			InSection.AddEntry(ComboEntry);
+		}
+	}));
 }
 
 void SMCPPIEPanel::UnregisterToolbarButton()
 {
-	if (ToolbarExtender.IsValid())
-	{
-		FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>("LevelEditor");
-		if (LevelEditorModule)
-		{
-			LevelEditorModule->GetToolBarExtensibilityManager()->RemoveExtender(ToolbarExtender);
-		}
-		ToolbarExtender.Reset();
-	}
+	UnregisterPIETransportStyle();
 }
 
 void SMCPPIEPanel::Construct(const FArguments& InArgs)
