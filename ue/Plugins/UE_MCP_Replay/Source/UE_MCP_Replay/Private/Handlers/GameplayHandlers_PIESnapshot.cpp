@@ -4,9 +4,7 @@
 // UProperty plus an optional component dump.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
-#include "JsonSerializer.h"
 #include "PIE/PIESequenceFormat.h"
 #include "Editor.h"
 #include "Engine/Engine.h"

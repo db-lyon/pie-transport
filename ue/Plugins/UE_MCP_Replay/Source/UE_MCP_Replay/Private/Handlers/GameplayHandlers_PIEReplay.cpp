@@ -2,7 +2,6 @@
 // Members of FGameplayHandlers.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "PIE/PIEInputReplayer.h"
 #include "PIE/PIESequenceFormat.h"

@@ -2,7 +2,6 @@
 // Members of FGameplayHandlers.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "HandlerAssetCreate.h"
 #include "PIE/PIEObserver.h"

@@ -5,7 +5,6 @@
 // UEnhancedInputLocalPlayerSubsystem::InjectInputForAction.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "PIE/PIEInputInjector.h"
 #include "InputAction.h"

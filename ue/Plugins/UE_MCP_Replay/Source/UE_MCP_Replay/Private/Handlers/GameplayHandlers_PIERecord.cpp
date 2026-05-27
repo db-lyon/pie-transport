@@ -2,7 +2,6 @@
 // _list / _read / _delete / pie_mark. Members of FGameplayHandlers.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "PIE/PIEInputRecorder.h"
 #include "PIE/PIESequenceFormat.h"

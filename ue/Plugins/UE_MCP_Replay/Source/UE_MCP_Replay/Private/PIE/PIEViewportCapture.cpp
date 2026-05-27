@@ -1,5 +1,5 @@
 #include "PIEViewportCapture.h"
-#include "UE_MCP_BridgeModule.h"
+#include "UE_MCP_ReplayModule.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "ImageUtils.h"

@@ -3,7 +3,6 @@
 // drift.json shape (without writing to disk).
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "PIE/PIESequenceFormat.h"
 #include "Misc/FileHelper.h"

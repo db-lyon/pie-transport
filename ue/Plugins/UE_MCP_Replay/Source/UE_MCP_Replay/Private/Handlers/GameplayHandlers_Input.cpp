@@ -4,7 +4,6 @@
 // stays in GameplayHandlers.cpp::RegisterHandlers.
 
 #include "GameplayHandlers.h"
-#include "HandlerRegistry.h"
 #include "HandlerUtils.h"
 #include "HandlerAssetCreate.h"
 #include "AssetToolsModule.h"
