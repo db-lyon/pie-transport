@@ -1,11 +1,11 @@
-# ue-mcp-replay
+# pie-transport
 
 PIE record, replay, observe, and input injection for [ue-mcp](https://github.com/db-lyon/ue-mcp).
 
 ## Install
 
 ```bash
-ue-mcp plugin install ue-mcp-replay
+ue-mcp plugin install pie-transport
 ```
 
 This installs the npm package, deploys the native C++ module to your project's `Plugins/` directory, and adds the plugin to your `ue-mcp.yml`. Rebuild the UE project before launching the editor.
