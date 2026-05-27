@@ -1,3 +1,0 @@
-5571eca fix: remove bridge-private includes from extracted C++ source
-0817600 feat: initial plugin scaffold with native C++ module
-004b93b init claude
