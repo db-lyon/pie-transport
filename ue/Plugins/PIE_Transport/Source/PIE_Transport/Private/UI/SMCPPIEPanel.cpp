@@ -45,6 +45,7 @@ static void RegisterPIETransportStyle()
 	PIETransportStyleSet->SetContentRoot(ResourcesDir);
 	PIETransportStyleSet->Set("PIETransport.Record", new IMAGE_BRUSH("Record_Icon40x", CoreStyleConstants::Icon16x16));
 	PIETransportStyleSet->Set("PIETransport.RecordPlay", new IMAGE_BRUSH("RecordPlay_Icon40x", CoreStyleConstants::Icon16x16));
+	PIETransportStyleSet->Set("PIETransport.Play", new IMAGE_BRUSH("Play_Icon40x", CoreStyleConstants::Icon16x16));
 	FSlateStyleRegistry::RegisterSlateStyle(*PIETransportStyleSet);
 }
 
@@ -735,7 +736,9 @@ void SMCPPIEPanel::RefreshRecordings()
 			+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
 			[
 				SNew(SButton)
-				.Text(FText::FromString(TEXT("Replay")))
+				.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
+				.ContentPadding(FMargin(2))
+				.ToolTipText(FText::FromString(TEXT("Replay")))
 				.OnClicked_Lambda([Id]()
 				{
 					UEMCPPIE::FReplayerArmConfig Cfg;
@@ -749,6 +752,11 @@ void SMCPPIEPanel::RefreshRecordings()
 					}
 					return FReply::Handled();
 				})
+				[
+					SNew(SImage)
+					.Image(FSlateStyleRegistry::FindSlateStyle("PIETransportStyle")->GetBrush("PIETransport.Play"))
+					.DesiredSizeOverride(FVector2D(16.f))
+				]
 			]
 			+ SHorizontalBox::Slot().AutoWidth().Padding(2, 0)
 			[
