@@ -29,6 +29,9 @@ void FUE_MCP_ReplayModule::StartupModule()
 	});
 
 	// Register all PIE handlers on the bridge via the external API.
+	// Bare names here; the plugin actionPrefix "pie" is prepended by ue-mcp
+	// to form the MCP tool name (e.g. record_arm -> pie_record_arm).
+
 	// Input injection
 	UEMCP::RegisterExternalHandler(TEXT("inject_input"), &FGameplayHandlers::InjectInput);
 	UEMCP::RegisterExternalHandler(TEXT("inject_input_start"), &FGameplayHandlers::InjectInputStart);
@@ -37,44 +40,44 @@ void FUE_MCP_ReplayModule::StartupModule()
 	UEMCP::RegisterExternalHandler(TEXT("inject_input_tape"), &FGameplayHandlers::InjectInputTape);
 
 	// Recording
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_arm"), &FGameplayHandlers::PieRecordArm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_disarm"), &FGameplayHandlers::PieRecordDisarm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_stop"), &FGameplayHandlers::PieRecordStop);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_status"), &FGameplayHandlers::PieRecordStatus);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_list"), &FGameplayHandlers::PieRecordList);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_read"), &FGameplayHandlers::PieRecordRead);
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_delete"), &FGameplayHandlers::PieRecordDelete);
-	UEMCP::RegisterExternalHandler(TEXT("pie_mark"), &FGameplayHandlers::PieMark);
+	UEMCP::RegisterExternalHandler(TEXT("record_arm"), &FGameplayHandlers::PieRecordArm);
+	UEMCP::RegisterExternalHandler(TEXT("record_disarm"), &FGameplayHandlers::PieRecordDisarm);
+	UEMCP::RegisterExternalHandler(TEXT("record_stop"), &FGameplayHandlers::PieRecordStop);
+	UEMCP::RegisterExternalHandler(TEXT("record_status"), &FGameplayHandlers::PieRecordStatus);
+	UEMCP::RegisterExternalHandler(TEXT("record_list"), &FGameplayHandlers::PieRecordList);
+	UEMCP::RegisterExternalHandler(TEXT("record_read"), &FGameplayHandlers::PieRecordRead);
+	UEMCP::RegisterExternalHandler(TEXT("record_delete"), &FGameplayHandlers::PieRecordDelete);
+	UEMCP::RegisterExternalHandler(TEXT("mark"), &FGameplayHandlers::PieMark);
 
 	// Replay
-	UEMCP::RegisterExternalHandler(TEXT("pie_replay_arm"), &FGameplayHandlers::PieReplayArm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_replay_disarm"), &FGameplayHandlers::PieReplayDisarm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_replay_stop"), &FGameplayHandlers::PieReplayStop);
-	UEMCP::RegisterExternalHandler(TEXT("pie_replay_status"), &FGameplayHandlers::PieReplayStatus);
+	UEMCP::RegisterExternalHandler(TEXT("replay_arm"), &FGameplayHandlers::PieReplayArm);
+	UEMCP::RegisterExternalHandler(TEXT("replay_disarm"), &FGameplayHandlers::PieReplayDisarm);
+	UEMCP::RegisterExternalHandler(TEXT("replay_stop"), &FGameplayHandlers::PieReplayStop);
+	UEMCP::RegisterExternalHandler(TEXT("replay_status"), &FGameplayHandlers::PieReplayStatus);
 
 	// Diff / Snapshot
-	UEMCP::RegisterExternalHandler(TEXT("pie_record_diff"), &FGameplayHandlers::PieRecordDiff);
-	UEMCP::RegisterExternalHandler(TEXT("pie_snapshot"), &FGameplayHandlers::PieSnapshot);
+	UEMCP::RegisterExternalHandler(TEXT("record_diff"), &FGameplayHandlers::PieRecordDiff);
+	UEMCP::RegisterExternalHandler(TEXT("snapshot"), &FGameplayHandlers::PieSnapshot);
 
 	// Observation profiles
-	UEMCP::RegisterExternalHandler(TEXT("pie_profile_create"), &FGameplayHandlers::PieProfileCreate);
-	UEMCP::RegisterExternalHandler(TEXT("pie_profile_read"), &FGameplayHandlers::PieProfileRead);
-	UEMCP::RegisterExternalHandler(TEXT("pie_profile_update"), &FGameplayHandlers::PieProfileUpdate);
-	UEMCP::RegisterExternalHandler(TEXT("pie_profile_delete"), &FGameplayHandlers::PieProfileDelete);
-	UEMCP::RegisterExternalHandler(TEXT("pie_profile_list"), &FGameplayHandlers::PieProfileList);
+	UEMCP::RegisterExternalHandler(TEXT("profile_create"), &FGameplayHandlers::PieProfileCreate);
+	UEMCP::RegisterExternalHandler(TEXT("profile_read"), &FGameplayHandlers::PieProfileRead);
+	UEMCP::RegisterExternalHandler(TEXT("profile_update"), &FGameplayHandlers::PieProfileUpdate);
+	UEMCP::RegisterExternalHandler(TEXT("profile_delete"), &FGameplayHandlers::PieProfileDelete);
+	UEMCP::RegisterExternalHandler(TEXT("profile_list"), &FGameplayHandlers::PieProfileList);
 
 	// Observer
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_arm"), &FGameplayHandlers::PieObserveArm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_disarm"), &FGameplayHandlers::PieObserveDisarm);
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_stop"), &FGameplayHandlers::PieObserveStop);
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_status"), &FGameplayHandlers::PieObserveStatus);
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_list"), &FGameplayHandlers::PieObserveList);
-	UEMCP::RegisterExternalHandler(TEXT("pie_observe_read"), &FGameplayHandlers::PieObserveRead);
+	UEMCP::RegisterExternalHandler(TEXT("observe_arm"), &FGameplayHandlers::PieObserveArm);
+	UEMCP::RegisterExternalHandler(TEXT("observe_disarm"), &FGameplayHandlers::PieObserveDisarm);
+	UEMCP::RegisterExternalHandler(TEXT("observe_stop"), &FGameplayHandlers::PieObserveStop);
+	UEMCP::RegisterExternalHandler(TEXT("observe_status"), &FGameplayHandlers::PieObserveStatus);
+	UEMCP::RegisterExternalHandler(TEXT("observe_list"), &FGameplayHandlers::PieObserveList);
+	UEMCP::RegisterExternalHandler(TEXT("observe_read"), &FGameplayHandlers::PieObserveRead);
 
 	// PIE inspection
-	UEMCP::RegisterExternalHandler(TEXT("get_pie_anim_state"), &FGameplayHandlers::GetPieAnimState);
-	UEMCP::RegisterExternalHandler(TEXT("get_pie_anim_properties"), &FGameplayHandlers::GetPieAnimProperties);
-	UEMCP::RegisterExternalHandler(TEXT("get_pie_subsystem_state"), &FGameplayHandlers::GetPieSubsystemState);
+	UEMCP::RegisterExternalHandler(TEXT("anim_state"), &FGameplayHandlers::GetPieAnimState);
+	UEMCP::RegisterExternalHandler(TEXT("anim_properties"), &FGameplayHandlers::GetPieAnimProperties);
+	UEMCP::RegisterExternalHandler(TEXT("subsystem_state"), &FGameplayHandlers::GetPieSubsystemState);
 
 	// CPU throttle suppression while recording/replaying/observing
 	FTSTicker::GetCoreTicker().AddTicker(
@@ -114,34 +117,34 @@ void FUE_MCP_ReplayModule::ShutdownModule()
 	UEMCP::UnregisterExternalHandler(TEXT("inject_input_update"));
 	UEMCP::UnregisterExternalHandler(TEXT("inject_input_stop"));
 	UEMCP::UnregisterExternalHandler(TEXT("inject_input_tape"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_arm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_disarm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_stop"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_status"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_list"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_read"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_delete"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_mark"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_replay_arm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_replay_disarm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_replay_stop"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_replay_status"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_record_diff"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_snapshot"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_profile_create"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_profile_read"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_profile_update"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_profile_delete"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_profile_list"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_arm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_disarm"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_stop"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_status"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_list"));
-	UEMCP::UnregisterExternalHandler(TEXT("pie_observe_read"));
-	UEMCP::UnregisterExternalHandler(TEXT("get_pie_anim_state"));
-	UEMCP::UnregisterExternalHandler(TEXT("get_pie_anim_properties"));
-	UEMCP::UnregisterExternalHandler(TEXT("get_pie_subsystem_state"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_arm"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_disarm"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_stop"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_status"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_list"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_read"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_delete"));
+	UEMCP::UnregisterExternalHandler(TEXT("mark"));
+	UEMCP::UnregisterExternalHandler(TEXT("replay_arm"));
+	UEMCP::UnregisterExternalHandler(TEXT("replay_disarm"));
+	UEMCP::UnregisterExternalHandler(TEXT("replay_stop"));
+	UEMCP::UnregisterExternalHandler(TEXT("replay_status"));
+	UEMCP::UnregisterExternalHandler(TEXT("record_diff"));
+	UEMCP::UnregisterExternalHandler(TEXT("snapshot"));
+	UEMCP::UnregisterExternalHandler(TEXT("profile_create"));
+	UEMCP::UnregisterExternalHandler(TEXT("profile_read"));
+	UEMCP::UnregisterExternalHandler(TEXT("profile_update"));
+	UEMCP::UnregisterExternalHandler(TEXT("profile_delete"));
+	UEMCP::UnregisterExternalHandler(TEXT("profile_list"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_arm"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_disarm"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_stop"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_status"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_list"));
+	UEMCP::UnregisterExternalHandler(TEXT("observe_read"));
+	UEMCP::UnregisterExternalHandler(TEXT("anim_state"));
+	UEMCP::UnregisterExternalHandler(TEXT("anim_properties"));
+	UEMCP::UnregisterExternalHandler(TEXT("subsystem_state"));
 
 	UEMCPPIE::FPIEObserver::Get().Shutdown();
 	UEMCPPIE::FPIEInputReplayer::Get().Shutdown();

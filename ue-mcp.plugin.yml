@@ -11,34 +11,34 @@ nativeModule:
     inject_input_update: { description: "Change value of a running hold" }
     inject_input_stop: { description: "Stop a running hold or tape by id" }
     inject_input_tape: { description: "Play a per-frame value array through Enhanced Input" }
-    pie_record_arm: { description: "Arm the PIE input recorder" }
-    pie_record_disarm: { description: "Cancel an armed recording" }
-    pie_record_stop: { description: "Finalize in-flight recording" }
-    pie_record_status: { description: "Recorder state poll" }
-    pie_record_list: { description: "List recordings" }
-    pie_record_read: { description: "Read a recording artifact" }
-    pie_record_delete: { description: "Delete a recording directory" }
-    pie_mark: { description: "Insert a marker into the recording timeline" }
-    pie_replay_arm: { description: "Arm the PIE input replayer" }
-    pie_replay_disarm: { description: "Cancel an armed replay" }
-    pie_replay_stop: { description: "Stop in-flight replay" }
-    pie_replay_status: { description: "Replayer state poll" }
-    pie_record_diff: { description: "Diff two recordings" }
-    pie_snapshot: { description: "Snapshot a PIE actor's state" }
-    pie_profile_create: { description: "Create an observation profile" }
-    pie_profile_read: { description: "Read an observation profile" }
-    pie_profile_update: { description: "Update an observation profile" }
-    pie_profile_delete: { description: "Delete an observation profile" }
-    pie_profile_list: { description: "List observation profiles" }
-    pie_observe_arm: { description: "Arm the PIE observer" }
-    pie_observe_disarm: { description: "Cancel an armed observation" }
-    pie_observe_stop: { description: "Stop in-flight observation" }
-    pie_observe_status: { description: "Observer state poll" }
-    pie_observe_list: { description: "List observation runs" }
-    pie_observe_read: { description: "Read an observation run artifact" }
-    get_pie_anim_state: { description: "Get PIE anim instance state" }
-    get_pie_anim_properties: { description: "Read UPROPERTY values on a PIE actor's AnimInstance" }
-    get_pie_subsystem_state: { description: "Read UPROPERTY values on a running subsystem in PIE" }
+    record_arm: { description: "Arm the PIE input recorder" }
+    record_disarm: { description: "Cancel an armed recording" }
+    record_stop: { description: "Finalize in-flight recording" }
+    record_status: { description: "Recorder state poll" }
+    record_list: { description: "List recordings" }
+    record_read: { description: "Read a recording artifact" }
+    record_delete: { description: "Delete a recording directory" }
+    mark: { description: "Insert a marker into the recording timeline" }
+    replay_arm: { description: "Arm the PIE input replayer" }
+    replay_disarm: { description: "Cancel an armed replay" }
+    replay_stop: { description: "Stop in-flight replay" }
+    replay_status: { description: "Replayer state poll" }
+    record_diff: { description: "Diff two recordings" }
+    snapshot: { description: "Snapshot a PIE actor's state" }
+    profile_create: { description: "Create an observation profile" }
+    profile_read: { description: "Read an observation profile" }
+    profile_update: { description: "Update an observation profile" }
+    profile_delete: { description: "Delete an observation profile" }
+    profile_list: { description: "List observation profiles" }
+    observe_arm: { description: "Arm the PIE observer" }
+    observe_disarm: { description: "Cancel an armed observation" }
+    observe_stop: { description: "Stop in-flight observation" }
+    observe_status: { description: "Observer state poll" }
+    observe_list: { description: "List observation runs" }
+    observe_read: { description: "Read an observation run artifact" }
+    anim_state: { description: "Get PIE anim instance state" }
+    anim_properties: { description: "Read UPROPERTY values on a PIE actor's AnimInstance" }
+    subsystem_state: { description: "Read UPROPERTY values on a running subsystem in PIE" }
 
 inject: {}
 tasks: {}
