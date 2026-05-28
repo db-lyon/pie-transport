@@ -47,6 +47,7 @@ private:
 	TArray<FString> CachedRecordingIds;
 	TSet<FString> ExpandedRecordingIds;
 	double LastRecordingsRefresh = 0.0;
+	bool bCaptureGifOnReplay = false;
 
 	// Profiles list
 	TSharedPtr<SVerticalBox> ProfilesListBox;

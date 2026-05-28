@@ -509,6 +509,16 @@ TSharedRef<SWidget> SMCPPIEPanel::BuildRecordingsSection()
 				.Text(FText::FromString(TEXT("Recordings")))
 			]
 			+ SHorizontalBox::Slot().FillWidth(1.f)
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0)
+			[
+				SNew(SCheckBox)
+				.IsChecked_Lambda([this]() { return bCaptureGifOnReplay ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
+				.OnCheckStateChanged_Lambda([this](ECheckBoxState S) { bCaptureGifOnReplay = (S == ECheckBoxState::Checked); })
+				.ToolTipText(FText::FromString(TEXT("Capture viewport frames during replay and assemble into a GIF on completion. Off = no frames written, no GIF.")))
+				[
+					SNew(STextBlock).Text(FText::FromString(TEXT("Capture GIF")))
+				]
+			]
 			+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
 			[
 				SNew(SButton)
@@ -683,12 +693,14 @@ void SMCPPIEPanel::RefreshRecordings()
 					SNew(SButton)
 					.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
 					.ContentPadding(FMargin(2))
-					.ToolTipText(FText::FromString(TEXT("Replay + Capture")))
+					.ToolTipText_Lambda([this]() {
+						return FText::FromString(bCaptureGifOnReplay ? TEXT("Replay + Capture GIF") : TEXT("Replay"));
+					})
 					.OnClicked_Lambda([this, Id]()
 					{
 						UEMCPPIE::FReplayerArmConfig Cfg;
 						Cfg.SourceRecordingId = Id;
-						Cfg.CaptureFrameEvery = 2;
+						Cfg.CaptureFrameEvery = bCaptureGifOnReplay ? 2 : 0;
 						FString Err, Msg;
 						UEMCPPIE::FPIEInputReplayer::Get().Arm(Cfg, Err, Msg);
 						for (const FString& ProfilePath : ActiveProfilePaths)
