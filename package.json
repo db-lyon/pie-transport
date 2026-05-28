@@ -1,6 +1,6 @@
 {
   "name": "pie-studio",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "PIE record, replay, observe, and input injection for ue-mcp",
   "type": "module",
   "main": "dist/index.js",
