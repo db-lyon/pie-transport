@@ -2,7 +2,7 @@
 #include "PIEViewportCapture.h"
 #include "PIEGifEncoder.h"
 #include "PIEInputInjector.h"
-#include "PIE_TransportModule.h"
+#include "PIE_StudioModule.h"
 #include "Editor.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -214,7 +214,7 @@ namespace UEMCPPIE
 		{
 			C->SetControlRotation(F0.PawnRotation);
 		}
-		UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] Teleported pawn to frame 0: %s %s"),
+		UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] Teleported pawn to frame 0: %s %s"),
 			*F0.PawnLocation.ToString(), *F0.PawnRotation.ToString());
 	}
 
@@ -242,7 +242,7 @@ namespace UEMCPPIE
 			PC->UnPossess();
 			PC->Possess(Spectator);
 			bEjected = true;
-			UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] Ejected to spectator"));
+			UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] Ejected to spectator"));
 		}
 	}
 
@@ -260,7 +260,7 @@ namespace UEMCPPIE
 			{
 				Spectator->Destroy();
 			}
-			UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] Re-possessed original pawn"));
+			UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] Re-possessed original pawn"));
 		}
 		bEjected = false;
 		EjectedPC.Reset();
@@ -330,7 +330,7 @@ namespace UEMCPPIE
 				if (!LoadSourceFrames(CurrentSourceCSV, Err))
 				{
 					// Non-fatal: just disable drift comparison this replay.
-					UE_LOG(LogPIETransport, Warning, TEXT("[PIE-REP] Drift disabled (%s)"), *Err);
+					UE_LOG(LogPIEStudio, Warning, TEXT("[PIE-REP] Drift disabled (%s)"), *Err);
 					SourceFrames.Reset();
 				}
 				// Tracked-actor sidecar is optional and silently disabled
@@ -341,7 +341,7 @@ namespace UEMCPPIE
 					FString JErr;
 					if (!LoadTrackedActorsJSONL(JsonlPath, SourceActorRows, JErr))
 					{
-						UE_LOG(LogPIETransport, Warning, TEXT("[PIE-REP] tracked.jsonl read failed: %s"), *JErr);
+						UE_LOG(LogPIEStudio, Warning, TEXT("[PIE-REP] tracked.jsonl read failed: %s"), *JErr);
 						SourceActorRows.Reset();
 					}
 					else
@@ -393,7 +393,7 @@ namespace UEMCPPIE
 		if (!PIEWorld || !GEngine || Hz <= 0) return;
 		const FString Cmd = FString::Printf(TEXT("t.MaxFPS %d"), Hz);
 		GEngine->Exec(PIEWorld, *Cmd);
-		UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] %s"), *Cmd);
+		UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] %s"), *Cmd);
 	}
 
 	void FPIEInputReplayer::OnBeginPIE(bool /*bIsSimulating*/)
@@ -429,7 +429,7 @@ namespace UEMCPPIE
 			ViewportCapture->SetEnabled(true);
 		}
 
-		UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] Armed → BeginPIE, waiting for pawn (%d steps)"), ActiveSequence.Steps.Num());
+		UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] Armed → BeginPIE, waiting for pawn (%d steps)"), ActiveSequence.Steps.Num());
 	}
 
 	void FPIEInputReplayer::ExecutePendingSteps(double ElapsedMs)
@@ -518,7 +518,7 @@ namespace UEMCPPIE
 				const FString FullPath = Dir / FString::Printf(TEXT("%s_frame%05llu.png"), *Safe, FrameIdx);
 				FScreenshotRequest::RequestScreenshot(FullPath, /*bShowUI*/false, /*bAddFilenameSuffix*/false);
 				Sampler.QueueMarker(FString::Printf(TEXT("capture:%s:%s"), *Safe, *FullPath));
-				UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] capture requested: %s"), *FullPath);
+				UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] capture requested: %s"), *FullPath);
 				break;
 			}
 			}
@@ -581,7 +581,7 @@ namespace UEMCPPIE
 						WS->MaxGlobalTimeDilation = FMath::Max(WS->MaxGlobalTimeDilation, 1000.f);
 						WS->MinGlobalTimeDilation = FMath::Min(WS->MinGlobalTimeDilation, 0.0001f);
 						UGameplayStatics::SetGlobalTimeDilation(PIEWorld, Pending.TimeScale);
-						UE_LOG(LogPIETransport, Log, TEXT("[PIE-REP] Time scale: %.2f"), Pending.TimeScale);
+						UE_LOG(LogPIEStudio, Log, TEXT("[PIE-REP] Time scale: %.2f"), Pending.TimeScale);
 					}
 				}
 
@@ -788,7 +788,7 @@ namespace UEMCPPIE
 			}
 			else
 			{
-				UE_LOG(LogPIETransport, Warning, TEXT("[PIE-REP] drift write failed: %s"), *Err);
+				UE_LOG(LogPIEStudio, Warning, TEXT("[PIE-REP] drift write failed: %s"), *Err);
 			}
 		}
 

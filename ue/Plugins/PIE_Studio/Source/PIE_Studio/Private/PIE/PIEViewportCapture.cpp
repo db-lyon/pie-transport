@@ -1,5 +1,5 @@
 #include "PIEViewportCapture.h"
-#include "PIE_TransportModule.h"
+#include "PIE_StudioModule.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "ImageUtils.h"

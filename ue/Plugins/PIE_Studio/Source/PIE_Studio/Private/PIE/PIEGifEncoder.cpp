@@ -1,5 +1,5 @@
 #include "PIEGifEncoder.h"
-#include "PIE_TransportModule.h"
+#include "PIE_StudioModule.h"
 #include "ImageUtils.h"
 #include "Misc/FileHelper.h"
 #include "IImageWrapperModule.h"
@@ -229,7 +229,7 @@ namespace UEMCPPIE
 		int32 SrcW = 0, SrcH = 0;
 		if (!LoadPngPixels(FramePaths[0], FirstPixels, SrcW, SrcH))
 		{
-			UE_LOG(LogPIETransport, Warning, TEXT("[GIF] Failed to load first frame: %s"), *FramePaths[0]);
+			UE_LOG(LogPIEStudio, Warning, TEXT("[GIF] Failed to load first frame: %s"), *FramePaths[0]);
 			return false;
 		}
 
@@ -310,7 +310,7 @@ namespace UEMCPPIE
 			int32 W = 0, H = 0;
 			if (!LoadPngPixels(FramePaths[i], Pixels, W, H))
 			{
-				UE_LOG(LogPIETransport, Warning, TEXT("[GIF] Skipping unreadable frame: %s"), *FramePaths[i]);
+				UE_LOG(LogPIEStudio, Warning, TEXT("[GIF] Skipping unreadable frame: %s"), *FramePaths[i]);
 				continue;
 			}
 
@@ -324,11 +324,11 @@ namespace UEMCPPIE
 
 		if (!FFileHelper::SaveArrayToFile(Gif, *OutputPath))
 		{
-			UE_LOG(LogPIETransport, Warning, TEXT("[GIF] Failed to write: %s"), *OutputPath);
+			UE_LOG(LogPIEStudio, Warning, TEXT("[GIF] Failed to write: %s"), *OutputPath);
 			return false;
 		}
 
-		UE_LOG(LogPIETransport, Log, TEXT("[GIF] Wrote %d frames -> %s (%.1f KB)"),
+		UE_LOG(LogPIEStudio, Log, TEXT("[GIF] Wrote %d frames -> %s (%.1f KB)"),
 			FramePaths.Num(), *OutputPath, Gif.Num() / 1024.f);
 		return true;
 	}

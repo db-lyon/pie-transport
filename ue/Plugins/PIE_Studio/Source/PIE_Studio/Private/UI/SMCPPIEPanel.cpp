@@ -1,5 +1,5 @@
 #include "SMCPPIEPanel.h"
-#include "PIE_TransportModule.h"
+#include "PIE_StudioModule.h"
 #include "PIE/PIEInputRecorder.h"
 #include "PIE/PIEInputReplayer.h"
 #include "PIE/PIEObserver.h"
@@ -34,31 +34,31 @@
 
 const FName SMCPPIEPanel::TabId(TEXT("MCPPIEPanel"));
 
-#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(PIETransportStyleSet->RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(PIEStudioStyleSet->RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
-static TSharedPtr<FSlateStyleSet> PIETransportStyleSet;
+static TSharedPtr<FSlateStyleSet> PIEStudioStyleSet;
 
-static void RegisterPIETransportStyle()
+static void RegisterPIEStudioStyle()
 {
-	if (PIETransportStyleSet.IsValid()) return;
+	if (PIEStudioStyleSet.IsValid()) return;
 
 	FString ResourcesDir = FPaths::Combine(
-		FPaths::ProjectPluginsDir(), TEXT("PIE_Transport"), TEXT("Resources"));
+		FPaths::ProjectPluginsDir(), TEXT("PIE_Studio"), TEXT("Resources"));
 
-	PIETransportStyleSet = MakeShareable(new FSlateStyleSet("PIETransportStyle"));
-	PIETransportStyleSet->SetContentRoot(ResourcesDir);
-	PIETransportStyleSet->Set("PIETransport.Record", new IMAGE_BRUSH("Record_Icon40x", CoreStyleConstants::Icon16x16));
-	PIETransportStyleSet->Set("PIETransport.RecordPlay", new IMAGE_BRUSH("RecordPlay_Icon40x", CoreStyleConstants::Icon16x16));
-	PIETransportStyleSet->Set("PIETransport.Play", new IMAGE_BRUSH("Play_Icon40x", CoreStyleConstants::Icon16x16));
-	FSlateStyleRegistry::RegisterSlateStyle(*PIETransportStyleSet);
+	PIEStudioStyleSet = MakeShareable(new FSlateStyleSet("PIEStudioStyle"));
+	PIEStudioStyleSet->SetContentRoot(ResourcesDir);
+	PIEStudioStyleSet->Set("PIEStudio.Record", new IMAGE_BRUSH("Record_Icon40x", CoreStyleConstants::Icon16x16));
+	PIEStudioStyleSet->Set("PIEStudio.RecordPlay", new IMAGE_BRUSH("RecordPlay_Icon40x", CoreStyleConstants::Icon16x16));
+	PIEStudioStyleSet->Set("PIEStudio.Play", new IMAGE_BRUSH("Play_Icon40x", CoreStyleConstants::Icon16x16));
+	FSlateStyleRegistry::RegisterSlateStyle(*PIEStudioStyleSet);
 }
 
-static void UnregisterPIETransportStyle()
+static void UnregisterPIEStudioStyle()
 {
-	if (PIETransportStyleSet.IsValid())
+	if (PIEStudioStyleSet.IsValid())
 	{
-		FSlateStyleRegistry::UnRegisterSlateStyle(*PIETransportStyleSet);
-		PIETransportStyleSet.Reset();
+		FSlateStyleRegistry::UnRegisterSlateStyle(*PIEStudioStyleSet);
+		PIEStudioStyleSet.Reset();
 	}
 }
 
@@ -141,12 +141,12 @@ TSharedPtr<FExtender> SMCPPIEPanel::ToolbarExtender;
 
 void SMCPPIEPanel::RegisterToolbarButton()
 {
-	RegisterPIETransportStyle();
+	RegisterPIEStudioStyle();
 
 	UToolMenu* ToolBar = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.PlayToolBar");
-	FToolMenuSection& Section = ToolBar->FindOrAddSection("PIETransport");
+	FToolMenuSection& Section = ToolBar->FindOrAddSection("PIEStudio");
 
-	Section.AddDynamicEntry("PIETransportActions", FNewToolMenuSectionDelegate::CreateLambda([](FToolMenuSection& InSection)
+	Section.AddDynamicEntry("PIEStudioActions", FNewToolMenuSectionDelegate::CreateLambda([](FToolMenuSection& InSection)
 	{
 		{
 			FToolMenuEntry Entry =
@@ -160,7 +160,7 @@ void SMCPPIEPanel::RegisterToolbarButton()
 					}),
 					FText::GetEmpty(),
 					FText::FromString(TEXT("Arm MCP recorder (waits for PIE start)")),
-					FSlateIcon("PIETransportStyle", "PIETransport.Record"));
+					FSlateIcon("PIEStudioStyle", "PIEStudio.Record"));
 			Entry.StyleNameOverride = FName("Toolbar.BackplateLeft");
 			InSection.AddEntry(Entry);
 		}
@@ -182,7 +182,7 @@ void SMCPPIEPanel::RegisterToolbarButton()
 					}),
 					FText::GetEmpty(),
 					FText::FromString(TEXT("Arm MCP recorder and start PIE")),
-					FSlateIcon("PIETransportStyle", "PIETransport.RecordPlay"));
+					FSlateIcon("PIEStudioStyle", "PIEStudio.RecordPlay"));
 			Entry.StyleNameOverride = FName("Toolbar.BackplateCenter");
 			InSection.AddEntry(Entry);
 		}
@@ -190,7 +190,7 @@ void SMCPPIEPanel::RegisterToolbarButton()
 		{
 			FToolMenuEntry ComboEntry =
 				FToolMenuEntry::InitComboButton(
-					"PIETransportMenu",
+					"PIEStudioMenu",
 					FUIAction(),
 					FNewMenuDelegate::CreateLambda([](FMenuBuilder& Menu)
 					{
@@ -278,7 +278,7 @@ void SMCPPIEPanel::RegisterToolbarButton()
 
 void SMCPPIEPanel::UnregisterToolbarButton()
 {
-	UnregisterPIETransportStyle();
+	UnregisterPIEStudioStyle();
 }
 
 void SMCPPIEPanel::Construct(const FArguments& InArgs)
@@ -545,7 +545,7 @@ TSharedRef<SWidget> SMCPPIEPanel::BuildProfilesSection()
 				.Text(FText::FromString(TEXT("Create")))
 				.OnClicked_Lambda([this]()
 				{
-					FString PackagePath = TEXT("/Game/PIETransport");
+					FString PackagePath = TEXT("/Game/PIEStudio");
 					FString AssetName = FString::Printf(TEXT("OP_%s"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S")));
 					FString FullPath = PackagePath / AssetName;
 
@@ -707,7 +707,7 @@ void SMCPPIEPanel::RefreshRecordings()
 					})
 					[
 						SNew(SImage)
-						.Image(FSlateStyleRegistry::FindSlateStyle("PIETransportStyle")->GetBrush("PIETransport.Play"))
+						.Image(FSlateStyleRegistry::FindSlateStyle("PIEStudioStyle")->GetBrush("PIEStudio.Play"))
 						.DesiredSizeOverride(FVector2D(16.f))
 					]
 				]

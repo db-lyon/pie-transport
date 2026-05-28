@@ -1,4 +1,4 @@
-#include "PIE_TransportModule.h"
+#include "PIE_StudioModule.h"
 #include "Modules/ModuleManager.h"
 #include "MCPHandlerRegistration.h"
 #include "Handlers/GameplayHandlers.h"
@@ -11,10 +11,10 @@
 #include "Misc/CoreDelegates.h"
 #include "Containers/Ticker.h"
 
-DEFINE_LOG_CATEGORY(LogPIETransport);
-IMPLEMENT_MODULE(FPIE_TransportModule, PIE_Transport)
+DEFINE_LOG_CATEGORY(LogPIEStudio);
+IMPLEMENT_MODULE(FPIE_StudioModule, PIE_Studio)
 
-void FPIE_TransportModule::StartupModule()
+void FPIE_StudioModule::StartupModule()
 {
 	UEMCPPIE::FPIEInputInjector::Init();
 	UEMCPPIE::FPIEInputRecorder::Get().Init();
@@ -104,10 +104,10 @@ void FPIE_TransportModule::StartupModule()
 		})
 	);
 
-	UE_LOG(LogPIETransport, Log, TEXT("[pie-transport] Registered %d handlers"), 33);
+	UE_LOG(LogPIEStudio, Log, TEXT("[pie-studio] Registered %d handlers"), 33);
 }
 
-void FPIE_TransportModule::ShutdownModule()
+void FPIE_StudioModule::ShutdownModule()
 {
 	SMCPPIEPanel::UnregisterToolbarButton();
 	SMCPPIEPanel::UnregisterTab();

@@ -2,7 +2,7 @@
   "FileVersion": 3,
   "Version": 1,
   "VersionName": "0.0.1",
-  "FriendlyName": "UE MCP Replay",
+  "FriendlyName": "PIE Studio",
   "Description": "PIE record, replay, observe, and input injection for ue-mcp",
   "Category": "Editor",
   "CreatedBy": "db-lyon",
@@ -11,7 +11,7 @@
   "IsBetaVersion": true,
   "Modules": [
     {
-      "Name": "PIE_Transport",
+      "Name": "PIE_Studio",
       "Type": "Editor",
       "LoadingPhase": "PostEngineInit"
     }

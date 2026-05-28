@@ -1,8 +1,8 @@
 using UnrealBuildTool;
 
-public class PIE_Transport : ModuleRules
+public class PIE_Studio : ModuleRules
 {
-	public PIE_Transport(ReadOnlyTargetRules Target) : base(Target)
+	public PIE_Studio(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
