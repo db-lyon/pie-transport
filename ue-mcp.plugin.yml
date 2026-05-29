@@ -1,45 +1,247 @@
 actionPrefix: "pie"
-minServerVersion: "1.0.54"
+minServerVersion: "1.0.69"   # provisioning a new category via nativeModule.category landed in 1.0.69
+
+# All actions are implemented by the PIE_Studio C++ module, which registers
+# them on the bridge via UEMCP::RegisterExternalHandler. `nativeModule.category`
+# provisions a top-level `pie` tool whose actions are the handlers, unprefixed:
+# pie(action="record_arm") dispatches to the bare bridge method `record_arm`.
+# Params are declared so the MCP layer forwards them (anything undeclared is
+# stripped before reaching the bridge); they are all optional at the schema
+# level - the C++ handler validates requiredness and returns a clear error, so
+# "(required)" in a description is the contract.
 
 nativeModule:
   uePluginName: PIE_Studio
   minBridgeApi: 1
   source: ue/Plugins/PIE_Studio
+  category: pie
+  categoryDescription: "PIE test automation: record, replay, observe, diff, snapshot, and inject input during Play-In-Editor sessions"
   handlers:
-    inject_input: { description: "Single-frame Enhanced Input inject" }
-    inject_input_start: { description: "Begin holding an Enhanced Input action" }
-    inject_input_update: { description: "Change value of a running hold" }
-    inject_input_stop: { description: "Stop a running hold or tape by id" }
-    inject_input_tape: { description: "Play a per-frame value array through Enhanced Input" }
-    record_arm: { description: "Arm the PIE input recorder" }
-    record_disarm: { description: "Cancel an armed recording" }
-    record_stop: { description: "Finalize in-flight recording" }
-    record_status: { description: "Recorder state poll" }
-    record_list: { description: "List recordings" }
-    record_read: { description: "Read a recording artifact" }
-    record_delete: { description: "Delete a recording directory" }
-    mark: { description: "Insert a marker into the recording timeline" }
-    replay_arm: { description: "Arm the PIE input replayer" }
-    replay_disarm: { description: "Cancel an armed replay" }
-    replay_stop: { description: "Stop in-flight replay" }
-    replay_status: { description: "Replayer state poll" }
-    record_diff: { description: "Diff two recordings" }
-    snapshot: { description: "Snapshot a PIE actor's state" }
-    profile_create: { description: "Create an observation profile" }
-    profile_read: { description: "Read an observation profile" }
-    profile_update: { description: "Update an observation profile" }
-    profile_delete: { description: "Delete an observation profile" }
-    profile_list: { description: "List observation profiles" }
-    observe_arm: { description: "Arm the PIE observer" }
-    observe_disarm: { description: "Cancel an armed observation" }
-    observe_stop: { description: "Stop in-flight observation" }
-    observe_status: { description: "Observer state poll" }
-    observe_list: { description: "List observation runs" }
-    observe_read: { description: "Read an observation run artifact" }
-    anim_state: { description: "Get PIE anim instance state" }
-    anim_properties: { description: "Read UPROPERTY values on a PIE actor's AnimInstance" }
-    subsystem_state: { description: "Read UPROPERTY values on a running subsystem in PIE" }
-    apply_damage: { description: "Apply damage to a PIE actor via UGameplayStatics" }
+
+    # ── Input injection ───────────────────────────────────────────
+    inject_input:
+      description: "Single-frame Enhanced Input inject"
+      schema:
+        action_path: { type: string,  description: "InputAction asset path (required)" }
+        value_x:     { type: number,  description: "Axis/bool value X (default 1)" }
+        value_y:     { type: number }
+        value_z:     { type: number }
+        client_id:   { type: number,  description: "PIE client index (default 0)" }
+    inject_input_start:
+      description: "Begin holding an Enhanced Input action"
+      schema:
+        action_path:  { type: string, description: "InputAction asset path (required)" }
+        value_x:      { type: number }
+        value_y:      { type: number }
+        value_z:      { type: number }
+        injection_id: { type: string, description: "Caller-chosen hold id (optional; minted if absent)" }
+        client_id:    { type: number }
+    inject_input_update:
+      description: "Change value of a running hold"
+      schema:
+        injection_id: { type: string, description: "Hold id from inject_input_start (required)" }
+        value_x:      { type: number }
+        value_y:      { type: number }
+        value_z:      { type: number }
+    inject_input_stop:
+      description: "Stop a running hold or tape by id"
+      schema:
+        injection_id: { type: string, description: "Injection id to stop (required)" }
+    inject_input_tape:
+      description: "Play a per-frame value array through Enhanced Input"
+      schema:
+        action_path:  { type: string, description: "InputAction asset path (required)" }
+        values:       { type: array,  description: "Per-frame values - numbers or [x,y,z] arrays (required)" }
+        hz:           { type: number, description: "Playback rate (default 60)" }
+        injection_id: { type: string }
+        client_id:    { type: number }
+
+    # ── Recording ─────────────────────────────────────────────────
+    record_arm:
+      description: "Arm the PIE input recorder"
+      schema:
+        actions:            { type: array,   description: "InputAction paths to record (default: auto-discover)" }
+        track_values:       { type: array,   description: "Dotted value paths to sample each frame" }
+        track_actors:       { type: array,   description: "Actor ids to sample pos/rot/vel each frame" }
+        axis_threshold:     { type: number,  description: "Axis change deadzone (default 0.15)" }
+        sample_hz:          { type: number,  description: "Sample rate (default 60)" }
+        pin_fps:            { type: number,  description: "Pin PIE fps for determinism (default sample_hz)" }
+        capture_pawn_state: { type: boolean }
+        capture_montage:    { type: boolean }
+        take_record:        { type: boolean, description: "Also drive Take Recorder" }
+        client_id:          { type: number }
+        rng_seed:           { type: number,  description: "Seed the stream RNG for reproducible runs" }
+        run_gap_frames:     { type: number,  description: "Frames of inactivity that split runs (default 6)" }
+        recording_dir:      { type: string,  description: "Recordings root (default: project Saved)" }
+        id:                 { type: string,  description: "Recording id (default: timestamp)" }
+    record_disarm:
+      description: "Cancel an armed recording"
+    record_stop:
+      description: "Finalize in-flight recording"
+    record_status:
+      description: "Recorder state poll"
+    record_list:
+      description: "List recordings"
+      schema:
+        recording_dir: { type: string }
+        limit:         { type: number, description: "Max rows (default 200)" }
+        offset:        { type: number }
+    record_read:
+      description: "Read a recording artifact"
+      schema:
+        id:            { type: string, description: "Recording id (required)" }
+        file:          { type: string, description: "manifest | sequence | csv | drift | tracked (default manifest)" }
+        recording_dir: { type: string }
+        limit:         { type: number, description: "csv only: max rows (default 1000)" }
+        offset:        { type: number, description: "csv only: starting row" }
+    record_delete:
+      description: "Delete a recording directory"
+      schema:
+        id:            { type: string,  description: "Recording id (required)" }
+        confirm:       { type: boolean, description: "Must be true to actually delete" }
+        recording_dir: { type: string }
+    mark:
+      description: "Insert a marker into the recording timeline"
+      schema:
+        label: { type: string, description: "Marker label (required)" }
+
+    # ── Replay ────────────────────────────────────────────────────
+    replay_arm:
+      description: "Arm the PIE input replayer"
+      schema:
+        recording_id:        { type: string,  description: "Source recording id" }
+        sequence_path:       { type: string,  description: "Explicit sequence.json path" }
+        recording_dir:       { type: string }
+        steps:               { type: array,   description: "Inline step array (alternative to a recording)" }
+        settle_ms:           { type: number,  description: "Settle delay before playback (default 500)" }
+        sample_hz:           { type: number }
+        rng_seed:            { type: number }
+        pin_fps:             { type: number }
+        apply_rng_seed:      { type: boolean, description: "Re-apply recorded seed (default true)" }
+        record_drift:        { type: boolean, description: "Record drift vs source (default true)" }
+        auto_stop_pie:       { type: boolean }
+        eject:               { type: boolean, description: "Eject to spectator during replay" }
+        time_scale:          { type: number,  description: "Playback speed multiplier (default 1)" }
+        mode:                { type: string,  description: "replay | monitor (default replay)" }
+        capture_frame_every: { type: number,  description: "Capture a viewport frame every N steps" }
+        client_id:           { type: number }
+        drift_thresholds:    { type: object,  description: "position_cm / rotation_deg / velocity_cms / tracked overrides" }
+    replay_disarm:
+      description: "Cancel an armed replay"
+    replay_stop:
+      description: "Stop in-flight replay"
+    replay_status:
+      description: "Replayer state poll"
+
+    # ── Offline diff ──────────────────────────────────────────────
+    record_diff:
+      description: "Diff two recordings"
+      schema:
+        a_id:               { type: string, description: "First recording id (required)" }
+        b_id:               { type: string, description: "Second recording id (required)" }
+        recording_dir:      { type: string }
+        position_cm:        { type: number, description: "Position drift threshold (default 5)" }
+        rotation_deg:       { type: number, description: "Rotation drift threshold (default 2)" }
+        velocity_cms:       { type: number, description: "Velocity drift threshold (default 25)" }
+        tracked_default:    { type: number, description: "Default tracked-value threshold" }
+        tracked_thresholds: { type: object, description: "Per-path tracked-value thresholds" }
+
+    # ── Snapshot ──────────────────────────────────────────────────
+    snapshot:
+      description: "Snapshot a PIE actor's full UProperty state to JSON"
+      schema:
+        target:             { type: string,  description: "Actor id to snapshot (required)" }
+        include_components: { type: boolean, description: "Dump components too (default true)" }
+        recording_id:       { type: string,  description: "Store under this recording's snapshots/ dir" }
+        recording_dir:      { type: string }
+        name:               { type: string,  description: "Snapshot filename (default: timestamp)" }
+
+    # ── Observation profiles ──────────────────────────────────────
+    profile_create:
+      description: "Create an observation profile asset"
+      schema:
+        name:                            { type: string,  description: "Asset name (required)" }
+        package_path:                    { type: string,  description: "Content path (default /Game/Observation)" }
+        onConflict:                      { type: string,  description: "skip | replace (default skip)" }
+        tracked_values:                  { type: array,   description: "Value paths or {path, drift_threshold} objects" }
+        tracked_actors:                  { type: array,   description: "Actor ids to track" }
+        capture_pawn_state:              { type: boolean }
+        capture_montage:                 { type: boolean }
+        position_threshold_cm:           { type: number }
+        rotation_threshold_deg:          { type: number }
+        velocity_threshold_cms:          { type: number }
+        tracked_value_default_threshold: { type: number }
+    profile_read:
+      description: "Read an observation profile"
+      schema:
+        path: { type: string, description: "Profile asset path (required)" }
+    profile_update:
+      description: "Update an observation profile"
+      schema:
+        path:                            { type: string, description: "Profile asset path (required)" }
+        tracked_values:                  { type: array,  description: "Replaces the tracked-values list" }
+        tracked_actors:                  { type: array,  description: "Replaces the tracked-actors list" }
+        capture_pawn_state:              { type: boolean }
+        capture_montage:                 { type: boolean }
+        position_threshold_cm:           { type: number }
+        rotation_threshold_deg:          { type: number }
+        velocity_threshold_cms:          { type: number }
+        tracked_value_default_threshold: { type: number }
+    profile_delete:
+      description: "Delete an observation profile"
+      schema:
+        path:    { type: string,  description: "Profile asset path (required)" }
+        confirm: { type: boolean, description: "Must be true to actually delete" }
+    profile_list:
+      description: "List observation profiles"
+      schema:
+        directory: { type: string, description: "Content path prefix to filter (default /Game)" }
+
+    # ── Observation runs ──────────────────────────────────────────
+    observe_arm:
+      description: "Arm the PIE observer"
+      schema:
+        profile:    { type: string, description: "Observation profile asset path (required)" }
+        output_dir: { type: string }
+        sample_hz:  { type: number, description: "Sample rate (default 60)" }
+        client_id:  { type: number }
+        pin_fps:    { type: number }
+    observe_disarm:
+      description: "Cancel an armed observation"
+    observe_stop:
+      description: "Stop in-flight observation"
+    observe_status:
+      description: "Observer state poll"
+    observe_list:
+      description: "List observation runs"
+      schema:
+        output_dir: { type: string }
+        limit:      { type: number, description: "Max rows (default 200)" }
+    observe_read:
+      description: "Read an observation run artifact"
+      schema:
+        run_id:     { type: string, description: "Observation run id (required)" }
+        output_dir: { type: string }
+        file:       { type: string, description: "manifest | csv | tracked (default manifest)" }
+        limit:      { type: number, description: "csv/tracked: max rows (default 1000)" }
+        offset:     { type: number }
+
+    # ── Live PIE introspection ────────────────────────────────────
+    anim_state:
+      description: "Get PIE anim instance state (montage + state machines)"
+      schema:
+        actorLabel: { type: string, description: "Actor label/name in PIE (required)" }
+    anim_properties:
+      description: "Read UPROPERTY values on a PIE actor's AnimInstance"
+      schema:
+        actorLabel:    { type: string, description: "Actor label/name in PIE (required)" }
+        propertyNames: { type: array,  description: "Specific property names (default: all)" }
+    subsystem_state:
+      description: "Read UPROPERTY values on a running subsystem in PIE"
+      schema:
+        subsystemClass: { type: string, description: "Subsystem class short name or path (required)" }
+        scope:          { type: string, description: "game | engine | world | localplayer (default game)" }
+        propertyNames:  { type: array,  description: "Specific property names (default: all)" }
 
 inject: {}
 tasks: {}

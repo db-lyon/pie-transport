@@ -14,7 +14,6 @@
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimNode_StateMachine.h"
 #include "AnimationRuntime.h"
-#include "Kismet/GameplayStatics.h"
 #include "Subsystems/SubsystemBlueprintLibrary.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Subsystems/WorldSubsystem.h"
@@ -274,60 +273,5 @@ TSharedPtr<FJsonValue> FGameplayHandlers::GetPieSubsystemState(const TSharedPtr<
 	Result->SetStringField(TEXT("subsystemClass"), Subsystem->GetClass()->GetPathName());
 	Result->SetStringField(TEXT("scope"), Scope);
 	Result->SetObjectField(TEXT("properties"), Props);
-	return MCPResult(Result);
-}
-
-// ─────────────────────────────────────────────────────────────
-// apply_damage_in_pie
-// ─────────────────────────────────────────────────────────────
-TSharedPtr<FJsonValue> FGameplayHandlers::ApplyDamageInPie(const TSharedPtr<FJsonObject>& Params)
-{
-	FString ActorLabel;
-	if (auto Err = RequireString(Params, TEXT("actorLabel"), ActorLabel)) return Err;
-
-	double BaseDamage = OptionalNumber(Params, TEXT("baseDamage"), 10.0);
-	FString DamageTypeClassName = OptionalString(Params, TEXT("damageTypeClass"), TEXT(""));
-
-	FWorldContext* PIEContext = GEditor->GetPIEWorldContext();
-	if (!PIEContext || !PIEContext->World())
-	{
-		return MCPError(TEXT("No PIE world available. Is Play-In-Editor running?"));
-	}
-	UWorld* PIEWorld = PIEContext->World();
-
-	AActor* TargetActor = FindActorByLabelOrName(PIEWorld, ActorLabel);
-	if (!TargetActor)
-	{
-		return MCPError(FString::Printf(TEXT("Actor not found in PIE: %s"), *ActorLabel));
-	}
-
-	TSubclassOf<UDamageType> DamageTypeClass = UDamageType::StaticClass();
-	if (!DamageTypeClassName.IsEmpty())
-	{
-		UClass* FoundClass = FindClassByShortName(DamageTypeClassName);
-		if (FoundClass && FoundClass->IsChildOf(UDamageType::StaticClass()))
-		{
-			DamageTypeClass = FoundClass;
-		}
-	}
-
-	APlayerController* PC = PIEWorld->GetFirstPlayerController();
-	AActor* DamageCauser = PC ? PC->GetPawn() : nullptr;
-	AController* InstigatorController = PC;
-
-	float ActualDamage = UGameplayStatics::ApplyDamage(
-		TargetActor,
-		static_cast<float>(BaseDamage),
-		InstigatorController,
-		DamageCauser,
-		DamageTypeClass
-	);
-
-	auto Result = MCPSuccess();
-	Result->SetStringField(TEXT("actorLabel"), ActorLabel);
-	Result->SetStringField(TEXT("actorClass"), TargetActor->GetClass()->GetName());
-	Result->SetNumberField(TEXT("baseDamage"), BaseDamage);
-	Result->SetNumberField(TEXT("actualDamage"), static_cast<double>(ActualDamage));
-	Result->SetStringField(TEXT("damageType"), DamageTypeClass->GetName());
 	return MCPResult(Result);
 }

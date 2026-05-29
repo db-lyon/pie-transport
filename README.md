@@ -57,15 +57,15 @@ Every replay automatically captures viewport frames and encodes an animated GIF 
 
 ## MCP Actions
 
-33 actions injected under the `pie` prefix:
+33 actions in the `pie` category (provisioned by the plugin; call as `pie(action="...")`):
 
-- **Recording** — `pie_record_arm`, `pie_record_stop`, `pie_record_status`, `pie_record_list`, `pie_record_read`, `pie_record_delete`, `pie_mark`
-- **Replay** — `pie_replay_arm`, `pie_replay_stop`, `pie_replay_status` with drift tracking and viewport capture
-- **Observation** — `pie_observe_arm`, `pie_observe_stop`, `pie_observe_status`, `pie_observe_list`, `pie_observe_read` with profile-based sampling
+- **Recording** — `record_arm`, `record_disarm`, `record_stop`, `record_status`, `record_list`, `record_read`, `record_delete`, `mark`
+- **Replay** — `replay_arm`, `replay_disarm`, `replay_stop`, `replay_status` with drift tracking and viewport capture
+- **Observation** — `observe_arm`, `observe_disarm`, `observe_stop`, `observe_status`, `observe_list`, `observe_read` with profile-based sampling
 - **Input injection** — `inject_input`, `inject_input_start`, `inject_input_update`, `inject_input_stop`, `inject_input_tape`
-- **Profiles** — `pie_profile_create`, `pie_profile_read`, `pie_profile_update`, `pie_profile_delete`, `pie_profile_list`
-- **Diff / Snapshot** — `pie_record_diff`, `pie_snapshot`
-- **PIE inspection** — `get_pie_anim_state`, `get_pie_anim_properties`, `get_pie_subsystem_state`
+- **Profiles** — `profile_create`, `profile_read`, `profile_update`, `profile_delete`, `profile_list`
+- **Diff / Snapshot** — `record_diff`, `snapshot`
+- **PIE inspection** — `anim_state`, `anim_properties`, `subsystem_state`
 
 ## Data Layout
 
