@@ -1,6 +1,6 @@
 {
   "name": "pie-studio",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "PIE record, replay, observe, and input injection for ue-mcp",
   "type": "module",
   "main": "dist/index.js",
@@ -17,11 +17,7 @@
     "recording",
     "pie"
   ],
-  "peerDependencies": {
-    "@db-lyon/flowkit": ">=0.5.0"
-  },
   "devDependencies": {
-    "@db-lyon/flowkit": "~0.5.2",
     "typescript": "^5.7.0"
   },
   "scripts": {
